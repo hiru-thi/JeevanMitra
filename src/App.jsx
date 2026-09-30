@@ -20,7 +20,7 @@ export default function App() {
   const [selected, setSelected] = useState(null)
   const [appointmentAnimalId, setAppointmentAnimalId] = useState('')
 
-  const { rows, daily, source, loading } = useReadings()
+  const { rows, daily, loading } = useReadings()
 
   function handleLogin(sessionInfo) {
     setSession(sessionInfo)
@@ -77,9 +77,8 @@ export default function App() {
       setLang={setLang}
       role={session.role}
       view={view}
-      source={source}
       ambientTemperature={ambientTemperature}
-      title={t(lang, view === 'st' ? 'stats' : view === 'ap' ? 'appointments' : session.role === 'gov' ? 'govDash' : 'overview')}
+      title={t(lang, view === 'st' && ['farmer', 'gov'].includes(session.role) ? 'stats' : view === 'ap' ? 'appointments' : session.role === 'gov' ? 'govDash' : 'overview')}
       onNav={(v) => {
         setView(v)
         setSelected(null)
@@ -94,12 +93,12 @@ export default function App() {
     >
       {view === 'cow' && cow ? (
         <CowDetail lang={lang} role={session.role} animal={cow} history={history} onBookSlot={bookSlot} />
-      ) : view === 'st' ? (
+      ) : view === 'st' && session.role === 'farmer' ? (
         <MonthlyStats lang={lang} rows={scoped} />
       ) : view === 'ap' ? (
         <Appointments lang={lang} role={session.role} animals={animals} initialAnimalId={appointmentAnimalId} />
       ) : session.role === 'gov' ? (
-        <GovernmentDashboard lang={lang} animals={animals} source={source} onOpen={openCow} />
+        <GovernmentDashboard lang={lang} animals={animals} rows={scoped} view={view} onOpen={openCow} />
       ) : (
         <Overview
           lang={lang}

@@ -217,6 +217,11 @@ svg { width: 100%; height: auto; display: block; }
 .gov-intro { margin-top: -16px; }
 .gov-intro p { margin: 0; color: var(--mu); font-size: 14px; }
 .gov-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.gov-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.gov-monthly-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.gov-monthly-panel { min-width: 0; }
+.gov-monthly-panel h4 { margin: 0 0 8px; font-size: 15px; }
+.gov-monthly-panel svg { height: 190px; }
 .gov-kpi { display: grid; align-content: start; gap: 8px; min-height: 112px; }
 .gov-kpi-label { color: var(--mu); font-size: 13px; font-weight: 500; }
 .gov-kpi > b { color: var(--ink); font: 600 30px/1.1 Fraunces, Georgia, serif; font-variant-numeric: tabular-nums; }
@@ -235,6 +240,7 @@ svg { width: 100%; height: auto; display: block; }
 .gov-directory-heading > span { color: var(--mu); font-size: 12px; }
 .gov-table-wrap { min-width: 0; overflow-x: auto; }
 .gov-table { min-width: 720px; }
+.gov-health-table { min-width: 980px; }
 .gov-farm-row { cursor: pointer; }
 .gov-farm-row:hover { background: var(--acs); }
 .gov-alert-count { color: var(--mu); font-variant-numeric: tabular-nums; }
@@ -268,6 +274,8 @@ svg { width: 100%; height: auto; display: block; }
   .stats-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stats-panel-wide { grid-column: 1 / -1; }
   .gov-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gov-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gov-monthly-grid { grid-template-columns: minmax(0, 1fr); }
   .gov-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .splash .in { padding-bottom: 6vh; }
   .lcard { padding: 16px 20px; }

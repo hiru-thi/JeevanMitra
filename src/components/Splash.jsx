@@ -17,7 +17,7 @@ export default function Splash({ lang, setLang, onContinue }) {
         <h1>JeevanMitra</h1>
         <p>{t(lang, 'sub')}</p>
         <button className="btn" onClick={onContinue}>
-          {t(lang, 'enter')}
+          {t(lang, 'enterDashboard')}
         </button>
       </div>
     </div>

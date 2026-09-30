@@ -1,18 +1,24 @@
 import { useMemo, useState } from 'react'
 import { t } from '../i18n'
 import { cat, score } from '../lib/risk'
+import CategoryChart from './CategoryChart'
 
 const SCHEMES = [
   'DAHD – Strategy for Prevention & Control of Mastitis',
   'National Programme for Dairy Development (NPDD)'
 ]
-const DEMO_FARM_COUNTS = { F1: 6, F2: 5, F3: 7 }
-
-export default function GovernmentDashboard({ lang, animals, source, onOpen }) {
+export default function GovernmentDashboard({ lang, animals, rows, view, onOpen }) {
   const [search, setSearch] = useState('')
   const [region, setRegion] = useState('')
   const [taluk, setTaluk] = useState('')
   const [sort, setSort] = useState('name')
+  const [isolatedCowIds] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem('jeevanmitra-isolated-cows:farmer') || '[]'))
+    } catch {
+      return new Set()
+    }
+  })
 
   const farms = useMemo(() => {
     const grouped = new Map()
@@ -24,20 +30,23 @@ export default function GovernmentDashboard({ lang, animals, source, onOpen }) {
         region: animal.region || animal.district || '',
         taluk: animal.taluk || animal.taluk_name || '',
         owners: new Set(),
-        animals: []
+        animals: [],
+        health: { healthy: 0, medium: 0, high: 0 }
       }
       if (animal.owner_name) farm.owners.add(animal.owner_name)
       farm.animals.push(animal)
+      const category = cat(score(animal))
+      farm.health[category >= 3 ? 'high' : category === 2 ? 'medium' : 'healthy'] += 1
       grouped.set(farmId, farm)
     })
     return [...grouped.values()].map((farm) => ({
       ...farm,
       owners: [...farm.owners].join(', '),
-      cowCount: source === 'demo' ? DEMO_FARM_COUNTS[farm.id] ?? farm.animals.length : farm.animals.length,
+      cowCount: farm.animals.length,
       alerts: farm.animals.filter((animal) => cat(score(animal)) >= 2).length,
       openAnimal: [...farm.animals].sort((a, b) => score(b) - score(a))[0]
     }))
-  }, [animals])
+  }, [animals, isolatedCowIds])
 
   const regions = [...new Set(farms.map((farm) => farm.region).filter(Boolean))].sort()
   const taluks = [...new Set(farms.filter((farm) => !region || farm.region === region).map((farm) => farm.taluk).filter(Boolean))].sort()
@@ -53,6 +62,96 @@ export default function GovernmentDashboard({ lang, animals, source, onOpen }) {
   })
   const alertCount = animals.filter((animal) => cat(score(animal)) >= 2).length
   const totalCows = farms.reduce((total, farm) => total + farm.cowCount, 0)
+  const riskCounts = animals.reduce((counts, animal) => {
+    const category = cat(score(animal))
+    counts[category >= 3 ? 'high' : category === 2 ? 'medium' : 'healthy'] += 1
+    return counts
+  }, { healthy: 0, medium: 0, high: 0 })
+  const isolatedCount = animals.filter((animal) => isolatedCowIds.has(animal.animal_id)).length
+  const monthly = useMemo(() => {
+    const grouped = new Map()
+    rows.forEach((row) => {
+      if (!row.recorded_at || !row.animal_id) return
+      const month = row.recorded_at.slice(0, 7)
+      const animalsInMonth = grouped.get(month) || new Map()
+      const previous = animalsInMonth.get(row.animal_id)
+      if (!previous || row.recorded_at >= previous.recorded_at) animalsInMonth.set(row.animal_id, row)
+      grouped.set(month, animalsInMonth)
+    })
+    const entries = [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b))
+    const locale = { en: 'en-IN', ta: 'ta-IN', hi: 'hi-IN' }[lang]
+    return {
+      labels: entries.map(([month]) => new Intl.DateTimeFormat(locale, { month: 'short', year: '2-digit' }).format(new Date(`${month}-15`))),
+      high: entries.map(([, monthAnimals]) => [...monthAnimals.values()].filter((animal) => cat(score(animal)) === 3).length),
+      medium: entries.map(([, monthAnimals]) => [...monthAnimals.values()].filter((animal) => cat(score(animal)) === 2).length),
+      healthy: entries.map(([, monthAnimals]) => [...monthAnimals.values()].filter((animal) => cat(score(animal)) < 2).length)
+    }
+  }, [rows, lang])
+
+  if (view === 'st') {
+    return (
+      <div className="gov-dashboard">
+        <div className="gov-intro"><p>{t(lang, 'govMonthlyDescription')}</p></div>
+        <section className="gov-summary-grid" aria-label={t(lang, 'govMonthly')}>
+          {[
+            [t(lang, 'totalMonitored'), totalCows],
+            [t(lang, 'infectedCows'), riskCounts.high],
+            [t(lang, 'mediumRisk'), riskCounts.medium],
+            [t(lang, 'healthyCows'), riskCounts.healthy],
+            [t(lang, 'isolatedCount'), isolatedCount],
+            [t(lang, 'predictedCases'), riskCounts.high + riskCounts.medium]
+          ].map(([label, value]) => (
+            <div className="card gov-kpi" key={label}>
+              <span className="gov-kpi-label">{label}</span>
+              <b>{value}</b>
+            </div>
+          ))}
+        </section>
+        <section className="gov-monthly">
+          <div className="gov-directory-heading"><h3>{t(lang, 'riskTrend')}</h3></div>
+          {monthly.labels.length ? (
+            <div className="gov-monthly-grid">
+              {[
+                [t(lang, 'infectedCows'), monthly.high, 'var(--r3)'],
+                [t(lang, 'mediumRisk'), monthly.medium, 'var(--r2)'],
+                [t(lang, 'healthyCows'), monthly.healthy, 'var(--ac)']
+              ].map(([label, values, color]) => (
+                <div className="card gov-monthly-panel" key={label}>
+                  <h4>{label}</h4>
+                  <CategoryChart labels={monthly.labels} values={values} type="bar" color={color} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-state">{t(lang, 'noMonthlyData')}</p>
+          )}
+        </section>
+        <section className="gov-directory">
+          <div className="gov-directory-heading"><h3>{t(lang, 'farmHealth')}</h3></div>
+          <div className="card gov-table-wrap">
+            <table className="gov-table gov-health-table">
+              <thead><tr>
+                <th>{t(lang, 'farm')}</th>
+                <th>{t(lang, 'totalCows')}</th>
+                <th>{t(lang, 'infectedCows')}</th>
+                <th>{t(lang, 'mediumRisk')}</th>
+                <th>{t(lang, 'healthyCows')}</th>
+              </tr></thead>
+              <tbody>{farms.map((farm) => (
+                <tr key={farm.id}>
+                  <td><b>{farm.name}</b></td>
+                  <td>{farm.cowCount}</td>
+                  <td>{farm.health.high}</td>
+                  <td>{farm.health.medium}</td>
+                  <td>{farm.health.healthy}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="gov-dashboard">

@@ -16,7 +16,7 @@ export default function Login({ lang, setLang, onLogin }) {
     setError('')
     if (!supabase) {
       // Demo mode: no backend configured, so the picked role is trusted directly.
-      onLogin({ role: pick, farmId: null })
+      onLogin({ role: pick, farmId: pick === 'farmer' ? 'F1' : null })
       return
     }
     setBusy(true)
@@ -66,7 +66,6 @@ export default function Login({ lang, setLang, onLogin }) {
           <input type="password" autoComplete="current-password" value={pass} onChange={(e) => setPass(e.target.value)} />
         </label>
         {error && <div className="lang-msg" style={{ color: '#ffb4a6' }}>{error}</div>}
-        {!supabase && <div className="lang-msg">Demo mode — connect Supabase for real sign-in.</div>}
         <button className="btn" onClick={submit} disabled={busy}>
           {t(lang, 'enter')}
         </button>

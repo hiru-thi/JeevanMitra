@@ -17,21 +17,20 @@ export default function Overview({ lang, role, animals, onOpen, onBookSlot, onOp
       return []
     }
   })
-  const dashboardAnimals = role === 'vet' ? animals.filter((animal) => cat(score(animal)) >= 2) : animals
+  const dashboardAnimals = role === 'vet' ? animals.filter((animal) => cat(score(animal)) === 3) : animals
   const isolatedCows = role === 'farmer' ? animals.filter((animal) => isolatedCowIds.includes(animal.animal_id)) : []
   const tableAnimals = role === 'farmer'
     ? animals.filter((animal) => !isolatedCowIds.includes(animal.animal_id))
     : dashboardAnimals
-  const attentionAnimals = role === 'farmer' ? tableAnimals : animals
+  const attentionAnimals = animals
   const scores = animals.map(score)
   const high = scores.filter((s) => cat(s) === 3).length
   const atRisk = scores.filter((s) => cat(s) >= 2).length
-  const kpis = [
-    [animals.length, 'herd'],
-    [high, 'high'],
-    [atRisk, 'atrisk'],
-    [avg(scores).toFixed(0), 'avg']
-  ]
+  const moderate = scores.filter((s) => cat(s) === 2).length
+  const low = scores.filter((s) => cat(s) === 1).length
+  const kpis = role === 'farmer'
+    ? [[animals.length, 'herd'], [high, 'high'], [moderate, 'r2'], [low, 'r1']]
+    : [[animals.length, 'herd'], [high, 'high'], [atRisk, 'atrisk'], [avg(scores).toFixed(0), 'avg']]
 
   function toggleIsolation(animalId) {
     setIsolatedCowIds((current) => {

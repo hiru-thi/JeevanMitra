@@ -1,7 +1,7 @@
 import { t } from '../i18n'
 import LangSwitch from './LangSwitch'
 
-export default function Shell({ lang, setLang, role, view, source, title, ambientTemperature, onNav, onBack, onSignOut, children }) {
+export default function Shell({ lang, setLang, role, view, title, ambientTemperature, onNav, onBack, onSignOut, children }) {
   return (
     <div className="app">
       <main>
@@ -20,16 +20,17 @@ export default function Shell({ lang, setLang, role, view, source, title, ambien
           <div className="top-right">
             <div className="top-meta">
               <span className="tag">{t(lang, role)}</span>
-              <span className="tag">{t(lang, source === 'live' ? 'live' : 'demo')}</span>
               <LangSwitch lang={lang} onChange={setLang} short />
             </div>
             <div className="top-actions">
               <button className={`header-stat ${view !== 'st' ? 'on' : ''}`} onClick={() => onNav('ov')} aria-pressed={view !== 'st'}>
                 {t(lang, 'overview')}
               </button>
-              <button className={`header-stat ${view === 'st' ? 'on' : ''}`} onClick={() => onNav('st')} aria-pressed={view === 'st'}>
-                {t(lang, 'stats')}
-              </button>
+              {(role === 'farmer' || role === 'gov') && (
+                <button className={`header-stat ${view === 'st' ? 'on' : ''}`} onClick={() => onNav('st')} aria-pressed={view === 'st'}>
+                  {t(lang, 'stats')}
+                </button>
+              )}
               <button className={`header-stat ${view === 'ap' ? 'on' : ''}`} onClick={() => onNav('ap')} aria-pressed={view === 'ap'}>
                 {t(lang, 'appointments')}
               </button>

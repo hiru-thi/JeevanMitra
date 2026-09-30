@@ -15,14 +15,26 @@ const OWNERS = ['Selvam K.', 'Muthu R.', 'Kavitha S.', 'Arjun P.', 'Devi M.', 'B
 const VET = 'Dr. Meenakshi R.'
 
 // r (0..1) is the underlying "mastitis pressure" for a cow on a given day.
-// Six animals: three kept low (healthy), one mid (moderate), two high.
+// Eighteen animals distributed across the three government dashboard farms.
 const HERD = [
-  { id: 1, r: 0.06, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
-  { id: 2, r: 0.09, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
-  { id: 3, r: 0.12, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
-  { id: 4, r: 0.5, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
-  { id: 5, r: 0.74, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
-  { id: 6, r: 0.86, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' }
+  { id: 1, r: 0.26, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 2, r: 0.30, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 3, r: 0.34, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 4, r: 0.55, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 5, r: 0.90, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 6, r: 0.95, farm_id: 'F1', farm_name: 'Coimbatore Dairy Cooperative', region: 'Coimbatore Region', district: 'Coimbatore', taluk: 'Mettupalayam' },
+  { id: 7, r: 0.28, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
+  { id: 8, r: 0.32, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
+  { id: 9, r: 0.95, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
+  { id: 10, r: 0.48, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
+  { id: 11, r: 0.95, farm_id: 'F2', farm_name: 'Bhavani Valley Dairy', region: 'Erode Region', district: 'Erode', taluk: 'Bhavani' },
+  { id: 12, r: 0.24, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 13, r: 0.30, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 14, r: 0.20, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 15, r: 0.24, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 16, r: 0.28, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 17, r: 0.50, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' },
+  { id: 18, r: 0.95, farm_id: 'F3', farm_name: 'Salem Hills Dairy', region: 'Salem Region', district: 'Salem', taluk: 'Bhavani' }
 ]
 
 function valuesFor(r, R) {
@@ -71,12 +83,12 @@ export function buildDemoData() {
       region: c.region,
       district: c.district,
       taluk: c.taluk,
-      breed: BREEDS[i],
+      breed: BREEDS[i % BREEDS.length],
       age: 3 + i,
       lactation: 1 + (i % 4),
       vet_name: VET,
       vet_phone: '+910000000000',
-      owner_name: OWNERS[i],
+      owner_name: OWNERS[i % OWNERS.length],
       owner_phone: '+910000000000'
     }
     for (let m = 0; m < 12; m++) {
