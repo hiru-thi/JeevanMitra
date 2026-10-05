@@ -1,201 +1,388 @@
-# JeevanMitra — Mastitis Early Warning (React + Supabase)
+# JEEVANMITRA
 
-A React front end for early forecasting of bovine mastitis. Three logins —
-Farmer, Veterinarian, Government official — see a shared herd, a
-high-risk priority list, a per-cow detail page with 30-day trends, and a
-monthly-statistics view across all 18 monitored parameters. English,
-Tamil and Hindi are built in.
+## TEAM MEMBERS
 
-## Run it locally
+1. SRINATH S
+2. SHANMUGARAJA D
+3. CHRISTINA DAMARIS E
+4. HIRUTHI S
+5. RAHUL M
+6. SANJAY A
+
+---
+
+## TEAM: VALYRIANS
+
+## Project Overview
+
+**MastiCattle** is an AI-enabled multimodal bovine mastitis monitoring and early-risk prediction system designed for continuous dairy-cow health monitoring.
+
+The system combines **milk parameters, udder thermal imaging, neckband-based behaviour monitoring, environmental data, animal history, and feeding behaviour** to identify abnormal patterns and generate cow-wise mastitis risk alerts.
+
+The system also supports **milk segregation and an isolation/recovery ward** for flagged animals, enabling continuous monitoring against the cow's individual healthy baseline.
+
+---
+
+## Project Structure
+
+```text
+masticattle/
+│
+├── frontend/                        ← React + Vite + Tailwind CSS
+│   └── src/
+│       ├── components/              ← Reusable UI components
+│       ├── pages/                   ← Farmer, Vet and Admin dashboards
+│       ├── services/                ← API and backend services
+│       ├── hooks/                   ← Custom React hooks
+│       └── utils/                   ← Helper functions
+│
+├── ai-model/                        ← Multimodal mastitis prediction
+│   ├── preprocessing/               ← Sensor data preprocessing
+│   ├── features/                    ← Feature extraction
+│   ├── training/                    ← Model training
+│   └── inference/                   ← Risk prediction
+│
+├── pi-agent/                        ← Raspberry Pi edge processing
+│   ├── sensors/                     ← Sensor interfaces
+│   ├── thermal/                     ← Udder thermal processing
+│   ├── milk/                        ← Milk parameter acquisition
+│   └── agent.py                     ← Main processing loop
+│
+├── neckband/                        ← Smart cattle neckband
+│   ├── firmware/
+│   └── sensors/
+│
+├── database/                        ← Database schema and seed data
+│   ├── migrations/
+│   └── seeds/
+│
+├── docs/                            ← Project documentation
+│   ├── architecture.md
+│   ├── hardware.md
+│   └── deployment.md
+│
+├── tests/                           ← Testing and validation
+│
+├── .gitignore
+├── .env.example
+└── README.md
+```
+
+---
+
+## System Architecture
+
+```text
+CATTLE
+  |
+  +-- Smart Neckband
+  |     ├── LSM6DS3TR-C
+  |     ├── TMP117
+  |     ├── nRF52840
+  |     └── SX1262 E22-900T22D LoRa
+  |
+  +-- Udder Screening
+  |     ├── 2 × MLX90640 Thermal Cameras
+  |     ├── RGB Camera
+  |     └── RFID
+  |
+  +-- Milk Screening
+  |     ├── Milk Yield
+  |     ├── Flow Rate
+  |     ├── EC
+  |     ├── pH
+  |     └── Milk Temperature
+  |
+  +-- Environmental Data
+  |
+  +-- Historical Animal Data
+          |
+          v
+   Raspberry Pi 4
+          |
+          v
+   Multimodal Data Fusion
+          |
+          v
+   Custom AI/ML Model
+          |
+          v
+   Mastitis Risk Score
+          |
+     +----+----+
+     |         |
+   Normal    Moderate/High
+     |         |
+     v         v
+ Main Milk   Milk Segregation
+ Tank        + Alert
+               |
+               v
+        Isolation & Recovery
+```
+
+---
+
+## Hardware Stack
+
+| Component                | Purpose                                   |
+| ------------------------ | ----------------------------------------- |
+| **LSM6DS3TR-C**          | Activity, posture and movement monitoring |
+| **TMP117**               | Neck/skin temperature                     |
+| **nRF52840**             | Neckband processing and sensor control    |
+| **SX1262 E22-900T22D**   | Long-range LoRa communication             |
+| **3.7 V 3000 mAh Li-Po** | Neckband power                            |
+| **MLX90640 × 2**         | Four-quarter udder thermal monitoring     |
+| **RGB Camera**           | Cow head alignment                        |
+| **RFID Reader**          | Individual cow identification             |
+| **Load Cell + HX711**    | Milk yield measurement                    |
+| **EC Probe**             | Milk electrical conductivity              |
+| **pH Probe**             | Milk pH                                   |
+| **PT100 + MAX31865**     | Milk temperature                          |
+| **Raspberry Pi 4**       | Edge processing and AI inference          |
+| **LoRa Gateway**         | Neckband data reception                   |
+
+---
+
+## Multimodal Parameters
+
+### Neckband
+
+* Activity
+* Walking
+* Standing
+* Lying
+* Feeding behaviour
+* Rumination-related motion
+* Skin temperature
+* Behavioural deviations
+
+### Udder
+
+Two thermal cameras monitor:
+
+```text
+Left Camera  → Left Front + Left Rear
+Right Camera → Right Front + Right Rear
+```
+
+The RGB camera verifies that the cow's head is correctly positioned before thermal measurement.
+
+### Milk
+
+* Milk yield
+* Milk flow
+* Electrical conductivity
+* pH
+* Milk temperature
+
+### Additional Data
+
+* Cow ID
+* Breed
+* Age
+* Lactation number
+* Lactation stage
+* Previous disease history
+* Historical healthy baseline
+* Environmental conditions
+* Feeding quantity and intake
+
+---
+
+## AI Risk Assessment
+
+MastiCattle does not rely on a single parameter such as EC.
+
+```text
+Milk Data
+    +
+Udder Thermal Data
+    +
+Neckband Behaviour
+    +
+Environmental Data
+    +
+Animal History
+    +
+Individual Baseline
+        |
+        v
+Multimodal Fusion
+        |
+        v
+Custom AI/ML Model
+        |
+        v
+Mastitis Risk
+```
+
+Risk categories:
+
+```text
+NO RISK
+LOW RISK
+MODERATE RISK
+HIGH RISK
+```
+
+---
+
+## Milk Segregation
+
+When the multimodal model identifies a significant mastitis risk:
+
+```text
+Milk Screening
+      |
+      v
+AI Risk Assessment
+      |
+      +---- Normal/Low ----> Main Milk Tank
+      |
+      +---- Moderate/High -> Segregated Milk Tank
+                                  |
+                                  v
+                            Farmer/Vet Alert
+```
+
+Milk diversion is based on the **combined risk assessment**, not EC alone.
+
+---
+
+## Isolation and Recovery
+
+Flagged cattle are moved to an isolation/recovery cell.
+
+The system establishes an **individual baseline when the cow enters isolation** and continuously compares new measurements against that baseline.
+
+Additional recovery monitoring includes:
+
+* Feed quantity
+* Feed intake
+* Feeding behaviour
+* Activity
+* Rumination
+* Temperature
+* Udder temperature
+* Other available health parameters
+
+```text
+Isolation Entry
+      |
+      v
+Individual Baseline
+      |
+      v
+Continuous Monitoring
+      |
+      v
+Trend Analysis
+      |
+   +--+--+
+   |     |
+Improving  Worsening
+   |     |
+   v     v
+Continue  Vet Alert
+Monitoring
+   |
+   v
+Veterinary Review
+   |
+   v
+Release Approval
+```
+
+---
+
+## Tech Stack
+
+| Layer           | Technology                |
+| --------------- | ------------------------- |
+| Edge Computing  | Raspberry Pi 4            |
+| AI/ML           | Python, Machine Learning  |
+| Neckband MCU    | nRF52840                  |
+| Wireless        | SX1262 E22-900T22D LoRa   |
+| Thermal Imaging | MLX90640                  |
+| Identification  | RFID                      |
+| Frontend        | React, Vite, Tailwind CSS |
+| Database        | PostgreSQL / Supabase     |
+| Communication   | LoRa, Wi-Fi               |
+| Dashboard       | Web-based dashboard       |
+
+---
+
+## Quick Start
+
+### Frontend
 
 ```bash
+cd frontend
 npm install
 npm run dev
 ```
 
-Without any Supabase project configured, the app runs entirely on a
-built-in 6-cow demo herd (3 no-risk, 1 moderate, 2 high risk), so you can
-open it and click around immediately.
+### AI Model
 
-## Connect Supabase
+```bash
+cd ai-model
+pip install -r requirements.txt
+python training/train.py
+```
 
-1. Create a Supabase project.
-2. Copy `.env.example` to `.env` and fill in your project URL and anon key:
+### Raspberry Pi Agent
 
-   ```
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=xxxxx
-   ```
+```bash
+cd pi-agent
+pip install -r requirements.txt
+python agent.py
+```
 
-3. Create the `readings` table (SQL editor in Supabase):
+---
 
-   ```sql
-   create table readings (
-     id bigint generated always as identity primary key,
-     animal_id text not null,
-     farm_id text not null,
-     district text,
-     breed text,
-     age int,
-     lactation int,
-     vet_name text,
-     vet_phone text,
-     owner_name text,
-     owner_phone text,
-     recorded_at date not null,
-     activity float8,
-     posture float8,
-     rumination float8,
-     skin_temperature float8,
-     udder_temperature float8,
-     thermal_asymmetry float8,
-     milk_yield float8,
-     milk_flow float8,
-     milk_conductivity float8,
-     milk_temperature float8,
-     milk_ph float8,
-     activity_change float8,
-     rumination_change float8,
-     temperature_deviation float8,
-     yield_change float8,
-     conductivity_change float8,
-     "pH_deviation" float8,
-     historical_trend float8,
-     scc float8
-   );
+## Key Features
 
-   -- Adjust to your real access rules before going live; this just lets
-   -- signed-in users read the herd.
-   alter table readings enable row level security;
-   create policy "read for authenticated users"
-     on readings for select
-     using (auth.role() = 'authenticated');
-   ```
+* Individual-cow mastitis risk prediction
+* Multimodal sensor fusion
+* Continuous behavioural monitoring
+* Four-quarter udder thermal monitoring
+* Milk quality and yield monitoring
+* Individual baseline comparison
+* AI-based milk segregation
+* Real-time farmer/veterinary alerts
+* Isolation and recovery monitoring
+* Historical health tracking
+* Edge AI processing
+* Scalable dairy-farm architecture
 
-   One row per animal per reading (insert as often as your sensors report —
-   daily is enough for the 30-day cow-detail charts). `scc`, `breed`, `age`
-   and `lactation` are optional; leave them null if you don't have them yet.
+---
 
-4. (Optional) Real sign-in with roles: create a `profiles` table keyed by
-   `auth.users.id` with a `role` column (`farmer` | `vet` | `gov`) and a
-   `farm_id` for farmers, then create users in Supabase Auth. Without this
-   table, the app trusts whichever role button the person picks on the
-   login screen — fine for a demo, not for production.
+## Project Goal
 
-   ```sql
-   create table profiles (
-     id uuid primary key references auth.users(id),
-     role text not null check (role in ('farmer','vet','gov')),
-     farm_id text
-   );
-   ```
+MastiCattle aims to shift bovine mastitis management from **late detection to early prediction**, combining multiple physiological, behavioural and milk-quality signals into a single actionable health assessment.
 
-5. (Optional) Persist veterinarian clinical outcomes in Supabase. Demo mode
-   stores assessments in this browser; configured Supabase mode expects this
-   table. The policy limits reads and inserts to veterinarian profiles.
+---
 
-   ```sql
-   create table vet_assessments (
-     id uuid primary key default gen_random_uuid(),
-     animal_id text not null,
-     farm_id text,
-     vet_id uuid references auth.users(id),
-     ai_risk_score float8 not null,
-     ai_risk_category text not null,
-     assessment jsonb not null,
-     created_at timestamptz not null default now()
-   );
+## Contributing
 
-   alter table vet_assessments enable row level security;
-   create policy "vets read their farm assessments"
-     on vet_assessments for select to authenticated
-     using (exists (
-       select 1 from profiles p
-       where p.id = auth.uid() and p.role = 'vet'
-         and (p.farm_id is null or p.farm_id = vet_assessments.farm_id)
-     ));
-   create policy "vets save their assessments"
-     on vet_assessments for insert to authenticated
-     with check (
-       vet_id = auth.uid() and exists (
-         select 1 from profiles p where p.id = auth.uid() and p.role = 'vet'
-       )
-     );
-   ```
+1. Fork the repository
+2. Create a feature branch
 
-   Trend charts use `skin_temperature` as body temperature and `posture` as a
-   rest proxy. Add `ambient_temperature` and `humidity` to sensor rows to
-   enable those series; otherwise the controls are shown as unavailable.
+```bash
+git checkout -b feature/my-feature
+```
 
-6. (Optional) Persist appointment bookings in Supabase. Demo mode stores
-   bookings in this browser. Create the table after `profiles` so farmers can
-   book a cow and veterinarians can see farm appointments.
+3. Commit your changes
 
-   ```sql
-   create table vet_appointments (
-     id uuid primary key default gen_random_uuid(),
-     animal_id text not null,
-     farm_id text not null,
-     booked_by uuid not null references auth.users(id),
-     appointment_at timestamptz not null unique,
-     reason text not null default '',
-     status text not null default 'Booked',
-     created_at timestamptz not null default now()
-   );
+```bash
+git commit -m "feat: add my feature"
+```
 
-   alter table vet_appointments enable row level security;
-   create policy "farmers and vets read appointments"
-     on vet_appointments for select to authenticated
-     using (
-       booked_by = auth.uid() or exists (
-         select 1 from profiles p
-         where p.id = auth.uid() and p.role = 'vet'
-           and (p.farm_id is null or p.farm_id = vet_appointments.farm_id)
-       )
-     );
-   create policy "farmers book appointments for their farm"
-     on vet_appointments for insert to authenticated
-     with check (
-       booked_by = auth.uid() and exists (
-         select 1 from profiles p
-         where p.id = auth.uid() and p.role = 'farmer'
-           and p.farm_id = vet_appointments.farm_id
-       )
-     );
-   create policy "farmers cancel their own appointments"
-     on vet_appointments for update to authenticated
-     using (
-       booked_by = auth.uid() and status = 'Booked' and exists (
-         select 1 from profiles p
-         where p.id = auth.uid() and p.role = 'farmer'
-           and p.farm_id = vet_appointments.farm_id
-       )
-     )
-     with check (
-       booked_by = auth.uid() and status = 'Cancelled' and exists (
-         select 1 from profiles p
-         where p.id = auth.uid() and p.role = 'farmer'
-           and p.farm_id = vet_appointments.farm_id
-       )
-     );
-   ```
+4. Push the branch
 
-## Where things live
+```bash
+git push origin feature/my-feature
+```
 
-- `src/lib/risk.js` — the 18 parameters, their groups/units, and the
-  composite risk score (0–100, bucketed into No risk / Low / Moderate /
-  High). Tune the score formula here once you have a trained model —
-  swap it for a call to your ML service.
-- `src/data/useReadings.js` — loads from Supabase if configured, otherwise
-  falls back to `src/data/demoData.js`.
-- `src/components/CowDetail.jsx` — the per-cow page. `KEY_CARD_KEYS` in
-  `risk.js` controls which metrics show as the top-of-page key cards
-  (currently udder temperature, SCC, conductivity, yield); the full
-  18-parameter breakdown is always shown further down the page.
-- `src/i18n.js` — English/Tamil/Hindi strings and parameter labels.
-
-## Digital twin
-
-Data loading is isolated in `useReadings.js`, so swapping in a live feed
-or a realtime Supabase subscription later shouldn't require touching any
-screen component.
+5. Open a Pull Request.
